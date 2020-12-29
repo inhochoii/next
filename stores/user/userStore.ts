@@ -163,9 +163,8 @@ class UserStore extends BaseStore {
 		this._init('READ_USER');
 		let sessionInfo:any = "";
 		try {
-			await client
-				.post('/Mypage/getMypageMainData', qs.stringify({ user_id: aes256Decrypt(userId) }))
-				.then((res) => (this._userInfo = res.data));
+			const res = await client.post('/Mypage/getMypageMainData', qs.stringify({ user_id: aes256Decrypt(userId) }))
+			this._userInfo = await res.data;
 			if (this.userInfo) {
 				sessionInfo = 
 					{
@@ -200,9 +199,8 @@ class UserStore extends BaseStore {
 	@action
 	nicknameConfirm = async (nickname: string) => {
 		this._nickNameStatus = '';
-		await client
-			.post('/User/userDupNicknameConfirm', qs.stringify({ nickname }))
-			.then((res) => (this._nickNameStatus = res.data.status));
+		const res = await client.post('/User/userDupNicknameConfirm', qs.stringify({ nickname }))
+		this._nickNameStatus = await res.data.status;
 	};
 
 	@action
@@ -210,9 +208,8 @@ class UserStore extends BaseStore {
 		this._emailStatus = '';
 		this._init('EMAIL_CONFIRM');
 		try {
-			await client
-				.post('/User/userDupEmailConfirm', qs.stringify({ email }))
-				.then((res) => (this._emailStatus = res.data.status));
+			const res = await client.post('/User/userDupEmailConfirm', qs.stringify({ email }))
+			this._emailStatus = await res.data.status;
 			this._success.EMAIL_CONFIRM = true;
 		} catch (e) {
 			this._failure.EMAIL_CONFIRM = [true, e];
@@ -224,9 +221,8 @@ class UserStore extends BaseStore {
 	@action
 	businessConfirm = async (business: string) => {
 		this.businessStatus = 0;
-		await client
-			.post('/User/userDupBusinessConfirm', qs.stringify({ business_num: business }))
-			.then((res) => (this.businessStatus = res.data.status));
+		const res = await client.post('/User/userDupBusinessConfirm', qs.stringify({ business_num: business }))
+		this.businessStatus = await res.data.status;
 	};
 
 	@action
@@ -368,9 +364,8 @@ class UserStore extends BaseStore {
 		this._init('BRIDGE_WALLET');
 		this.bridge = undefined;
 		try {
-			await client
-				.get(`/Luniverse/api/?type=query&&func=tx/v1.1/wallets/bridge&&walletType=LUNIVERSE&&userKey=${userKey}`)
-				.then((res) => (this.bridge = res.data));
+			const res = await client.get(`/Luniverse/api/?type=query&&func=tx/v1.1/wallets/bridge&&walletType=LUNIVERSE&&userKey=${userKey}`)
+			this.bridge = await res.data;
 			this._success.BRIDGE_WALLET = true;
 		} catch (e) {
 			this._failure.BRIDGE_WALLET = [true, e];
@@ -391,22 +386,19 @@ class UserStore extends BaseStore {
 
 		this._init('BALANCE_WALLET');
 		try {
-			await client
-				.get(`/Luniverse/api/?type=path&&func=tx/v1.1/wallets/${walletAddress}/BERRY/balance`)
-				.then((res) => (mainTokenStatus = res.data));
+			const res = await client.get(`/Luniverse/api/?type=path&&func=tx/v1.1/wallets/${walletAddress}/BERRY/balance`)
+			mainTokenStatus = await res.data;
 			if (mainTokenStatus.data.balance === '0') {
-				await client
-					.get(`/Luniverse/api/?type=path&&func=tx/v1.1/wallets/${walletAddress}/BERRY/BERRY/balance`)
-					.then((res) => (this.balance = res.data));
+				const res = await client.get(`/Luniverse/api/?type=path&&func=tx/v1.1/wallets/${walletAddress}/BERRY/BERRY/balance`)
+				this.balance = await res.data;
 			} else {
-				await client
-					.post(
+				const res = await client.post(
 						`/Luniverse/api/`,
 						qs.stringify({ type: 'post', func: `mx/v1.0/swap/${walletAddress}`, symbol: 'BERRY' })
 					)
-					.then((res) => (swapData = res.data));
+					swapData = await res.data;
 				if (swapData.result) {
-					await client
+					const res = await client
 						.get(
 							`/Luniverse/api/?type=query&&func=mx/v1.0/token/main-tokens/BERRY/transfer/raw-tx&&fromAddress=${
 								swapData.data.userAddress
@@ -414,11 +406,11 @@ class UserStore extends BaseStore {
 								mainTokenStatus.data.balance
 							}&&isDelegated=${true}&&gasLimit=3200000`
 						)
-						.then((res) => (resultRawTx = res.data));
+						resultRawTx = await res.data;
 					if (resultRawTx.result) {
-						await client
+						const res = await client
 							.get(`/Luniverse/api/?type=path&&func=mx/v1.0/wallets/${swapData.data.userAddress}/nonce`)
-							.then((res) => (resultNonce = res.data));
+							resultNonce = await res.data;
 						client.post(
 							'/Luniverse/api/',
 							qs.stringify({
@@ -429,15 +421,15 @@ class UserStore extends BaseStore {
 						);
 						if (resultNonce.result) {
 							resultRawTx.data.rawTx.nonce = resultNonce.data.nonce;
-							await client
+							const res = await client
 								.post(`/Luniverse/api/`, {
 									type: 'post',
 									func: `mx/v1.0/wallets/${swapData.data.userAddress}/sign`,
 									rawTx: resultRawTx.data.rawTx,
 								})
-								.then((res) => (resultRemoteSign = res.data));
+								resultRemoteSign = await res.data;
 							if (resultRemoteSign.result) {
-								await client
+								const res = await client
 									.post(
 										`/Luniverse/api`,
 										qs.stringify({
@@ -446,13 +438,13 @@ class UserStore extends BaseStore {
 											signedTx: resultRemoteSign.data.signedTx,
 										})
 									)
-									.then((res) => (resultSignedTx = res.data));
+									resultSignedTx = await res.data;
 								if (resultSignedTx.result) {
-									await client
+									const res = await client
 										.get(
 											`/Luniverse/api/?type=path&&func=tx/v1.1/wallets/${swapData.data.userAddress}/BERRY/BERRY/balance`
 										)
-										.then((res) => (this.balance = res.data));
+										this.balance = await res.data;
 								}
 							}
 						}
@@ -472,9 +464,9 @@ class UserStore extends BaseStore {
 		this.dAppStatus = '';
 		this._init('DAPP_CHECK');
 		try {
-			await client
+			const res = await client
 				.post('/Wallet/confirmWalletByAddress', qs.stringify({ wallet_address: toWalletAddress }))
-				.then((res) => (this.dAppStatus = res.data));
+				this.dAppStatus = await res.data;
 			this._success['DAPP_CHECK'] = true;
 		} catch (e) {
 			this._failure['DAPP_CHECK'] = [true, e];
@@ -488,9 +480,9 @@ class UserStore extends BaseStore {
 		this.confirmSendAmountStatus = '';
 		this._init('CONFIRM_SEND_AMOUNT');
 		try {
-			await client
+			const res = await client
 				.post('/Lock/confirmSendAmount', qs.stringify({ wallet_address: wallet_address, balance: balance }))
-				.then((res) => (this.confirmSendAmountStatus = res.data));
+				this.confirmSendAmountStatus = await res.data;
 			this._success['CONFIRM_SEND_AMOUNT'] = true;
 		} catch (e) {
 			this._failure['CONFIRM_SEND_AMOUNT'] = [true, e];
@@ -508,9 +500,9 @@ class UserStore extends BaseStore {
 	getWallet = async (user_id: string) => {
 		this._init('READ_WALLET');
 		try {
-			await client
+			const res = await client
 				.post('/Wallet/getUserWallet', qs.stringify({ user_id }))
-				.then((res) => (this._wallet_nm = res.data.wallet_nm));
+				this._wallet_nm = await res.data.wallet_nm;
 			this._success.READ_WALLET = true;
 		} catch (e) {
 			this._failure.READ_WALLET = [true, e];
@@ -525,7 +517,7 @@ class UserStore extends BaseStore {
 		let transactionsRes = false;
 		this._init('TRANSACTION_COMPLETE');
 		try {
-			await client
+			const res = await client
 				.post(
 					'/Luniverse/api/',
 					qs.stringify({
@@ -536,7 +528,7 @@ class UserStore extends BaseStore {
 						'inputs.valueAmount': amount,
 					})
 				)
-				.then((res) => (transactionsRes = res.data.result));
+				transactionsRes = await res.data.result;
 			if (transactionsRes) {
 				this._success.TRANSACTION_COMPLETE = true;
 			}
@@ -569,14 +561,15 @@ class UserStore extends BaseStore {
 		this._init('LOGIN');
 		let firstLoginResult: any = '';
 		try {
-			await client.post('/Auth/login', qs.stringify({ email })).then((res) => (firstLoginResult = res.data));
+			const res = await client.post('/Auth/login', qs.stringify({ email }))
+			firstLoginResult = await res.data;
 			if (firstLoginResult.status === '1') {
-				await client
+				const res = await client
 					.post(
 						'/Auth/loginValidate',
 						qs.stringify({ email, isCorrect: bcrypt.compareSync(password, firstLoginResult.hash) })
 					)
-					.then((res) => (this.loginResData = res.data));
+					this.loginResData = await res.data;
 				if (this.loginResData?.status === 1) {
 					sessionStorage.setItem('uuid', this.loginResData.user_id);
 					this._success.LOGIN = true;
@@ -613,9 +606,9 @@ class UserStore extends BaseStore {
 	getUserAddress = async (user_id: string) => {
 		this._init('READ_USER_ADDRESS');
 		try {
-			await client
+			const res = await client
 				.post('/Address/getAddressData', qs.stringify({ user_id }))
-				.then((res) => (this.userAddress = res.data));
+				this.userAddress = await res.data;
 			this._success.READ_USER_ADDRESS = true;
 		} catch (e) {
 			this._failure.READ_USER_ADDRESS = [true, e];
@@ -629,9 +622,9 @@ class UserStore extends BaseStore {
 	kakaoLogin = async (email: string, kakao_token: string) => {
 		this._init('KAKAO_LOGIN');
 		try {
-			await client
+			const res = await client
 				.post('/Auth/loginKakao', qs.stringify({ email: aes256Encrypt(email), kakao_token }))
-				.then((res) => (this.loginResData = res.data));
+				this.loginResData = await res.data;
 			if (this.loginResData?.status === 1) {
 				sessionStorage.setItem('uuid', this.loginResData.user_id);
 				this._success.KAKAO_LOGIN = true;
@@ -647,9 +640,9 @@ class UserStore extends BaseStore {
 	getPincode = async (user_id: string) => {
 		this._init('READ_PINCODE');
 		try {
-			await client
+			const res = await client
 				.post('/Auth/getAuthCode', qs.stringify({ user_id }))
-				.then((res) => (this._pincode = res.data.pin_code));
+				this._pincode = await res.data.pin_code;
 			this._success.READ_PINCODE = true;
 		} catch (e) {
 			this._failure.READ_PINCODE = [true, e];
@@ -659,10 +652,10 @@ class UserStore extends BaseStore {
 	};
 
 	@action
-	updatePincode = (user_id: string, pin_code: string) => {
+	updatePincode = async(user_id: string, pin_code: string) => {
 		this._init('UPDATE_PINCODE');
 		try {
-			client.post('/Auth/getAuthCodeUpdate', qs.stringify({ user_id, pin_code })).then((res) => console.log(res.data));
+			await client.post('/Auth/getAuthCodeUpdate', qs.stringify({ user_id, pin_code }))
 			this._success.UPDATE_PINCODE = true;
 		} catch (e) {
 			this._failure.UPDATE_PINCODE = [true, e];
@@ -727,11 +720,10 @@ class UserStore extends BaseStore {
 	updateUserPassword = async (user_id: number, password: string) => {
 		this._init('UPDATE_PASSWORD');
 		try {
-			await client.post('/User/setPassword', JSON.stringify({ user_id, password })).then((res) => {
-				if (res.data.status === 1) {
-					this._success.UPDATE_PASSWORD = true;
-				}
-			});
+			const res = await client.post('/User/setPassword', JSON.stringify({ user_id, password }))
+			if (res.data.status === 1) {
+				this._success.UPDATE_PASSWORD = true;
+			}
 			this._success.UPDATE_PASSWORD = true;
 		} catch (e) {
 			this._failure.UPDATE_PASSWORD = [true, e];
@@ -800,7 +792,6 @@ class UserStore extends BaseStore {
 						content,
 					})
 				)
-				.then((res) => console.log(res.data));
 			this._success.UPDATE_INQUIRE = true;
 		} catch (e) {
 			this._failure.UPDATE_INQUIRE = [true, e];
@@ -831,9 +822,9 @@ class UserStore extends BaseStore {
 	registerCoupon = async (user_id: string, coupon_code: string) => {
 		this._init('REGISTER_COUPON');
 		try {
-			await client
+			const res = await client
 				.post('/Couponlog/setCouponByUser', qs.stringify({ user_id, coupon_code }))
-				.then((res) => (this.couponInfo = res.data));
+				this.couponInfo = await res.data;
 			this._success.REGISTER_COUPON = true;
 		} catch (e) {
 			this._failure.REGISTER_COUPON = [true, e];
@@ -848,7 +839,8 @@ class UserStore extends BaseStore {
 		this.sendStatus = '';
 		this._init('SMS_SEND_CERTIFICATION');
 		try {
-			await client.post('/Sms/certSend', qs.stringify({ receiver })).then((res) => (this.sendStatus = res.data));
+			const res = await client.post('/Sms/certSend', qs.stringify({ receiver }))
+			this.sendStatus = await res.data;
 			this._success.SMS_SEND_CERTIFICATION = true;
 		} catch (e) {
 			this._failure.SMS_SEND_CERTIFICATION = [true, e];
@@ -863,9 +855,9 @@ class UserStore extends BaseStore {
 		this.certStatus = '';
 		this._init('SMS_CERTIFICATION_CHECK');
 		try {
-			await client
+			const res = await client
 				.post('/Sms/certMsgConfirm', qs.stringify({ receiver, cert_code }))
-				.then((res) => (this.certStatus = res.data));
+				this.certStatus = await res.data;
 			this._success.SMS_CERTIFICATION_CHECK = true;
 		} catch (e) {
 			this._failure.SMS_CERTIFICATION_CHECK = [true, e];
@@ -880,9 +872,9 @@ class UserStore extends BaseStore {
 		this.findSendStatus = '';
 		this._init('FIND_SEND_SMS');
 		try {
-			await client
+			const res = await client
 				.post('/Sms/certSend', qs.stringify({ receiver, find_type, find_value }))
-				.then((res) => (this.findSendStatus = res.data));
+				this.findSendStatus = await res.data;
 			this._success.FIND_SEND_SMS = true;
 			if (this.findSendStatus.status === '1') {
 				this.findSaveInfo.email = find_value;
@@ -900,9 +892,9 @@ class UserStore extends BaseStore {
 		this.findConfirmStatus = '';
 		this._init('FIND_CONFIRM_SMS');
 		try {
-			await client
+			const res = await client
 				.post('/Sms/certMsgConfirm', qs.stringify({ receiver, cert_code, mail_find_yn }))
-				.then((res) => (this.findConfirmStatus = res.data));
+				this.findConfirmStatus = await res.data;
 			this._success.FIND_CONFIRM_SMS = true;
 		} catch (e) {
 			this._failure.FIND_CONFIRM_SMS = [true, e];
@@ -913,9 +905,9 @@ class UserStore extends BaseStore {
 
 	@action
 	getUserId = async (email: string) => {
-		await client
+		const res = await client
 			.post('/Auth/loginValidate', qs.stringify({ email, isCorrect: true }))
-			.then((res) => (this.findSaveInfo.user_id = res.data.user_id));
+			this.findSaveInfo.user_id = await res.data.user_id;
 	};
 
 	@action
@@ -928,9 +920,9 @@ class UserStore extends BaseStore {
 	changeWalletName = async (user_id: string, wallet_nm: string) => {
 		this._init('UPDATE_WALLET_NAME');
 		try {
-			await client
+			const res = await client
 				.post('/Wallet/setWallet', qs.stringify({ user_id: user_id, wallet_nm: wallet_nm, act: 'update' }))
-				.then((res) => (this.changeWalletStatus = res.data));
+				this.changeWalletStatus = await res.data;
 			this._success['UPDATE_WALLET_NAME'] = true;
 		} catch (e) {
 			this._failure['UPDATE_WALLET_NAME'] = [true, e];
@@ -944,12 +936,12 @@ class UserStore extends BaseStore {
 		this.donationStatus = '';
 		this._init('DONATION_COMPLETE');
 		try {
-			await client
+			const res = await client
 				.post(
 					'/Donation/donate',
 					qs.stringify({ donation_id: donation_id, wallet_address: wallet_address, amount: amount })
 				)
-				.then((res) => (this.donationStatus = res.data));
+				this.donationStatus = await res.data;
 			this._success['DONATION_COMPLETE'] = true;
 		} catch (e) {
 			this._failure['DONATION_COMPLETE'] = [true, e];
