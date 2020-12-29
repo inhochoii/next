@@ -2,6 +2,7 @@ import { observable, action, computed, makeObservable } from 'mobx';
 import client from '../../lib/client';
 import { product, productDetail, celebItem, celeb, videos, event, donation } from './types';
 import BaseStore from '../BaseStore';
+import qs from 'qs';
 class ProductStore extends BaseStore {
 	constructor() {
 		super();
@@ -80,12 +81,8 @@ class ProductStore extends BaseStore {
 	getDeadLineProduct = async () => {
 		this._init('READ_DEADLINE_PRODUCT');
 		this.deadLineProduct = [];
-		const data: any = new FormData();
 		try {
-			data.append('s_category_id', 2);
-			data.append('order_type', 'end_dt-asc');
-			data.append('limit', '100000');
-			const res = await client.post('product/getRecentBidProductList', data);
+			const res = await client.post('product/getRecentBidProductList', qs.stringify({s_category_id:2, order_type:"asc", limit:"100000"}));
 			this.deadLineProduct = await res.data;
 			this._success.READ_DEADLINE_PRODUCT = true;
 		} catch (e) {
@@ -99,15 +96,9 @@ class ProductStore extends BaseStore {
 	getNewProduct = async () => {
 		this._init('READ_NEW_PRODUCT');
 		this.newProduct = [];
-		const data: any = new FormData();
 		try {
-			data.append('s_category_id', 2);
-			data.append('order_type', 'product_id-desc');
-			data.append('limit', '100000');
-
-			const res = await client.post('/product/getRecentBidProductList', data);
+			const res = await client.post('/product/getRecentBidProductList', qs.stringify({s_category_id:2, limit:"100000"}));
 			this.newProduct = await res.data;
-
 			this._success.READ_NEW_PRODUCT = true;
 		} catch (e) {
 			this._failure.READ_NEW_PRODUCT = [true, e];
@@ -121,16 +112,12 @@ class ProductStore extends BaseStore {
 	getMainProduct = async (num: number) => {
 		this.product = [];
 		this._init('READ_MAIN_PRODUCT');
-		const data: any = new FormData();
 		try {
 			if (num === 0) {
-				data.append('limit', 10000);
-				const res = await client.post('/Product/getRecentBidProductList', 'limit=10000');
+				const res = await client.post('/Product/getRecentBidProductList', qs.stringify({limit:"10000"}));
 				this.product = await res.data;
 			} else {
-				data.append('s_category_id', num);
-				data.append('limit', 10000);
-				const res = await client.post('/Product/getRecentBidProductList', data);
+				const res = await client.post('/Product/getRecentBidProductList', qs.stringify({s_category_id:num, limit:"10000"}));
 				this.product = await res.data;
 			}
 			this._success.READ_MAIN_PRODUCT = true;
@@ -146,12 +133,8 @@ class ProductStore extends BaseStore {
 		this._init('READ_PRODUCT');
 		this.product = [];
 
-		const data: any = new FormData();
 		try {
-			data.append('s_category_id', num);
-			data.append('limit', 10000);
-
-			const res = await client.post('/product/getRecentBidProductList', data);
+			const res = await client.post('/product/getRecentBidProductList', qs.stringify({s_category_id:num, limit:"10000"}));
 			this.product = await res.data;
 			this._success.READ_PRODUCT = true;
 		} catch (e) {
@@ -166,17 +149,12 @@ class ProductStore extends BaseStore {
 	getProductSortBy = async (str: string, num: number) => {
 		this.product = [];
 		this._init('READ_PRODUCT');
-		const data: any = new FormData();
 
 		if (str === 'all') {
 			this.getProduct(num);
 		} else {
 			try {
-				data.append('order_type', str);
-				data.append('s_category_id', num);
-				data.append('limit', 10000);
-
-				const res = await client.post('/Product/getRecentBidProductList', data);
+				const res = await client.post('/Product/getRecentBidProductList', qs.stringify({order_type:str, s_category_id:num, limit:"10000"}));
 				this.product = await res.data;
 				this._success.READ_PRODUCT = true;
 			} catch (e) {
@@ -191,11 +169,9 @@ class ProductStore extends BaseStore {
 	getProductDetail = async (productNum: number) => {
 		this.productDetail = undefined;
 		this._init('READ_PRODUCT_DETAIL');
-		const data: any = new FormData();
 
 		try {
-			data.append('product_id', productNum);
-			const res = await client.post('/product/getProductDetail', data);
+			const res = await client.post('/product/getProductDetail', qs.stringify({product_id:productNum}));
 			this.productDetail =  res.data;
 			this._success.READ_PRODUCT_DETAIL = true;
 		} catch (e) {
@@ -209,10 +185,8 @@ class ProductStore extends BaseStore {
 	getCelebItem = async (celeb_id: string) => {
 		this.celebItem = undefined;
 		this._init('READ_CELEBRITY_DETAIL');
-		const data: any = new FormData();
 		try {
-			data.append('celeb_id', celeb_id);
-			const res = await client.post('/Celeb/getCelebDetailById', data);
+			const res = await client.post('/Celeb/getCelebDetailById', {celeb_id:celeb_id});
 			this.celebItem = await res.data;
 
 			this._success.READ_CELEBRITY_DETAIL = true;
@@ -251,10 +225,8 @@ class ProductStore extends BaseStore {
 	@action
 	getEventList = async () => {
 		this._init('READ_EVENT');
-		const data: any = new FormData();
 		try {
-			data.append('type', 'event');
-			const res = await client.post('/Event/getEventList', data);
+			const res = await client.post('/Event/getEventList', qs.stringify({type:"event"}));
 			this._event = await res.data;
 			this._success.READ_EVENT = true;
 		} catch (e) {
@@ -268,13 +240,9 @@ class ProductStore extends BaseStore {
 	readEvent = async (event_id: string) => {
 		this._init('READ_EVENT_DETAIL');
 		this._eventItem = [];
-		const data: any = new FormData();
 
 		try {
-			data.append('event_id', event_id);
-			data.append('type', 'event');
-
-			const res = await client.post('/Event/getEventList', data);
+			const res = await client.post('/Event/getEventList', qs.stringify({event_id:event_id, type:"event"}));
 			this._eventItem = await res.data;
 			this._success.READ_EVENT_DETAIL = true;
 		} catch (e) {
@@ -291,8 +259,6 @@ class ProductStore extends BaseStore {
 		this._donation = [];
 		this._donationDetail = [];
 
-		const data = new FormData();
-
 		if (type === 'all') {
 			try {
 				await client.post('/Donation/getDonationData').then((res) => (this._donation = res.data));
@@ -304,8 +270,7 @@ class ProductStore extends BaseStore {
 			}
 		} else {
 			try {
-				data.append('donation_id', type);
-				const res = await client.post('/Donation/getDonationData', data);
+				const res = await client.post('/Donation/getDonationData', qs.stringify({donation_id:type}));
 				this._donationDetail = await res.data;
 				this._success['READ_DONATION_DETAIL'] = true;
 			} catch (e) {

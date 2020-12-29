@@ -6,7 +6,6 @@ import { product } from '../../../stores/product/types';
 import MainBanner from '../../layouts/banner/main/MainBanner';
 import more_btn from '../../../public/images/more_btn.png';
 import Truncate from 'react-truncate';
-
 interface Props {
 	product: product[];
 	newProduct: product[];
