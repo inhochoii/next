@@ -8,6 +8,8 @@ import { calculDate } from '../../../../lib/calculDate';
 import PersonIcon from '@material-ui/icons/Person';
 import ShareIcon from '@material-ui/icons/Share';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import TextareaAutosize from 'react-textarea-autosize';
+
 interface Props {
 	productDetail?: productDetail;
 	product: product[];
@@ -57,7 +59,7 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 	const [bidPrice, setBidPrice] = useState<string>('');
 
 	const onClickBid = () => {
-		alert('입찰하기 기능 추가 예정입니다.');
+		alert('그랜드 오픈 후, 입찰이 가능합니다.');
 	};
 
 	const onChangePrice = (e: any) => {
@@ -78,13 +80,16 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 	return (
 		<ProductWrap>
 			<DdayContainer>
-				{productDetail?.status === '0' ? (
+				{productDetail?.category_id==='6'?
+				<p>오픈예정</p>:
+				productDetail?.status === '0' ? (
 					<p>경매예정</p>
 				) : productDetail?.status === '1' ? (
 					<p>{`D-${date.replace(/일/gi, ' ')}`}</p>
 				) : (
 					<p>경매종료</p>
-				)}
+				)
+				}
 			</DdayContainer>
 			<ProductContainer>
 				<ProductImageContent>
@@ -126,28 +131,49 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 					</div>
 					<p className="product_info_name">{productDetail?.product_nm}</p>
 					<div className="product_info_bid_person">
-						<PersonIcon />
-						<p>0명이 경매에 입찰하였습니다.</p>
+						{productDetail?.category_id==='6'?<p></p>:
+							<>
+							<PersonIcon />
+							<p>0명이 경매에 입찰하였습니다.</p>
+							</>
+						}
 					</div>
 					<div className="product_info_bid_content">
 						<div>
-							<p>시작 입찰가</p>
-							<p>{productDetail?.price} B.POINT</p>
+						{
+								productDetail?.category_id==='6'?
+								<>
+								<p>참여 가능 베리</p>
+								<p>{productDetail.price} BERRY</p>
+								</>:
+								<>
+								<p>시작 입찰가</p>
+								<p>{productDetail?.price} B.POINT</p>
+								</>
+							}
 						</div>
-						{Number(productDetail?.category_id) < 3 && (
+						{Number(productDetail?.category_id) !== 6 && (
 							<div>
 								<p>현재 최고 입찰가</p>
 								<p>{productDetail?.price} B.POINT</p>
 							</div>
 						)}
-						<div>
+						{
+							productDetail?.category_id==='6'?
+							<div>
+								<p>오픈 예정일</p>
+								<p>{moment(productDetail.end_dt).format('YYYY-MM-DD')}</p>
+							</div>
+							:
+							<div>
 							<p>경매기간</p>
 							<p>{`${moment(productDetail?.start_dt).format('YYYY.MM.DD')} ~ ${moment(productDetail?.end_dt).format(
 								'YYYY.MM.DD'
 							)}`}</p>
 						</div>
+						}
 					</div>
-					{Number(productDetail?.category_id) < 3 ? (
+					{Number(productDetail?.category_id) !== 3 ? (
 						<>
 							<div className="product_info_delivery_content1">
 								<p className="delivery_text">택배배송</p>
@@ -155,21 +181,23 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 								<p className="delivery_text">무료배송</p>
 								<p className="delivery_more_text">제주, 도서지역 추가 3,000원</p>
 							</div>
+							{productDetail?.category_id==='6'?
+							<div></div>:
 							<div className="product_info_delivery_content2">
 								<p>출고기간</p>
 								<small>|</small>
 								<p>경매 낙찰일로 부터 1일</p>
 								<small>|</small>
 								<p>주말, 공휴일 제외</p>
-							</div>
+							</div>}
 							<div className="product_info_bid_price_wrap">
 								<input
 									id="bidPrice"
 									value={bidPrice}
-									placeholder="입찰하실 B.POINT의 양을 입력해 주세요."
+									placeholder={productDetail?.category_id==='6'?"참여하실 BERRY의 양을 입력해 주세요.":"입찰하실 B.POINT의 양을 입력해 주세요."}
 									onChange={onChangePrice}
 								></input>
-								<button onClick={onClickBid}>입찰하기</button>
+								<button onClick={onClickBid}>{productDetail?.category_id==='6'?"참여하기":"입찰하기"}</button>
 							</div>
 						</>
 					) : (
@@ -205,7 +233,7 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 				<DetailInfoContent>
 					<div className="product_summary_wrap">
 						<h4>소개</h4>
-						<p>{productDetail?.summary}</p>
+						<TextareaAutosize value={productDetail?.summary} readOnly />
 					</div>
 					<div className="product_content_wrap">
 						<h4>상세설명</h4>
@@ -213,7 +241,7 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 					</div>
 				</DetailInfoContent>
 			</ProductDetailInfoContainer>
-			{Number(productDetail?.category_id) > 2 ? (
+			{Number(productDetail?.category_id) === 3 && 
 				<WantBuyEnterContainer>
 					<WantBuyEnterHeader>
 						<h4>구매의향서 작성</h4>
@@ -222,31 +250,32 @@ const StoreDetailComponent: React.FC<Props> = ({ productDetail, product }) => {
 						<p>구매의향서 작성 준비중입니다.</p>
 					</WantBuyEnterContent>
 				</WantBuyEnterContainer>
-			) : (
-				recommendProduct.length > 0 && (
-					<RecommendProductContainer>
-						<RecommendProductHeader>
-							<h4>{recommendProduct[0].donor}님의 이런 상품(재능)은 어떠세요?</h4>
-						</RecommendProductHeader>
-						<RecommendProductContent>
-							{recommendProduct.map((item) => (
-								<article key={item.product_id}>
-									<a href={`/store/product/${item.product_id}`}>
-										<div className="recommend_product_image_wrap">
-											<div style={{ backgroundImage: `url(${item.image})` }} />
-										</div>
-										<div className="recommend_product_content_wrap">
-											<h3>{item.donor}</h3>
-											<h4>{item.product_nm}</h4>
-											<h5>{`${item.price} B.POINT`}</h5>
-										</div>
-									</a>
-								</article>
-							))}
-						</RecommendProductContent>
-					</RecommendProductContainer>
+			}
+			{Number(productDetail?.category_id) ===2&&
+			recommendProduct.length > 0 && (
+				<RecommendProductContainer>
+					<RecommendProductHeader>
+						<h4>{recommendProduct[0].donor}님의 이런 상품(재능)은 어떠세요?</h4>
+					</RecommendProductHeader>
+					<RecommendProductContent>
+						{recommendProduct.map((item) => (
+							<article key={item.product_id}>
+								<a href={`/store/product/${item.product_id}`}>
+									<div className="recommend_product_image_wrap">
+										<div style={{ backgroundImage: `url(${item.image})` }} />
+									</div>
+									<div className="recommend_product_content_wrap">
+										<h3>{item.donor}</h3>
+										<h4>{item.product_nm}</h4>
+										<h5>{`${item.price} B.POINT`}</h5>
+									</div>
+								</a>
+							</article>
+						))}
+					</RecommendProductContent>
+				</RecommendProductContainer>
 				)
-			)}
+			}
 		</ProductWrap>
 	);
 };
@@ -564,9 +593,17 @@ const DetailInfoContent = styled.div`
 		& > h4 {
 			font-size: 18px;
 		}
-		& > p {
+		& > textarea {
+			width:100%;
 			margin: 20px 0px 0px 0px;
 			font-size: 14px;
+			line-height:25px;
+			border:none;
+			outline:none;
+			resize:none;
+			font-family: 'Noto Sans KR', sans-serif;
+			font-weight:300;
+			color:#333333;
 		}
 	}
 	& > .product_content_wrap {

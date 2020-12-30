@@ -6,6 +6,7 @@ export type product = {
 	price: string;
 	d_day: string;
 	status: string;
+	category_id:string;
 };
 
 export type videos = {

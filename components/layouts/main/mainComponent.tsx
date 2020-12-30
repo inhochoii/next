@@ -24,7 +24,7 @@ const MainComponent: React.FC<Props> = ({ product, newProduct, getMainProduct })
 			if (product.length > 20) {
 				setProductLength(20);
 			} else {
-				for (let i = 0; i < product.length; i++) {
+				for (let i = 1; i < product.length+1; i++) {
 					if (i % 5 === 0) {
 						setProductLength(i);
 					}
@@ -75,13 +75,17 @@ const MainComponent: React.FC<Props> = ({ product, newProduct, getMainProduct })
 			<ProductContainer>
 				<ProductHeader>
 					<div className="main_product_header_left">
-						<h2>기부경매</h2>
+						<h2 onClick={() => onClickProductCategory(0)}>기부경매</h2>
 						<p onClick={() => onClickProductCategory(2)} style={mainProductCategory === 2 ? { fontWeight: 500 } : {}}>
 							애장품
 						</p>
 						<span>|</span>
 						<p onClick={() => onClickProductCategory(3)} style={mainProductCategory === 3 ? { fontWeight: 500 } : {}}>
 							재능
+						</p>
+						<span>|</span>
+						<p onClick={() => onClickProductCategory(6)} style={mainProductCategory === 6 ? { fontWeight: 500 } : {}}>
+							럭키굿즈
 						</p>
 					</div>
 					<div className="main_product_header_right">
@@ -108,7 +112,7 @@ const MainComponent: React.FC<Props> = ({ product, newProduct, getMainProduct })
 													<div className="new_item_content">
 														<h3>{item.donor}</h3>
 														<h4><Truncate lines={1}>{item.product_nm}</Truncate></h4>
-														<h5>{`${item.price} B.POINT`}</h5>
+														<h5>{item.price} {item.category_id==='6'?'BERRY':'B.POINT'}</h5>
 													</div>
 												</a>
 											</Link>
@@ -343,6 +347,7 @@ const ProductHeader = styled.div`
 			color: #333333;
 			font-size: 20px;
 			font-weight: 500;
+			cursor: pointer;
 		}
 		& > p {
 			margin: auto 0px 0px 0px;

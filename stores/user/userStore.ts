@@ -512,7 +512,7 @@ class UserStore extends BaseStore {
 	};
 
 	@action
-	transactionsWallet = async (fromWalletAddress: string, toWalletAddress: string, amount: string) => {
+	transactionsWallet = async (fromWalletAddress: string, toWalletAddress: string, amount: string, inputPincode:string) => {
 		const actionName = 'flexibleTransfer';
 		let transactionsRes = false;
 		this._init('TRANSACTION_COMPLETE');
@@ -526,6 +526,7 @@ class UserStore extends BaseStore {
 						from: fromWalletAddress,
 						'inputs.receiverAddress': toWalletAddress,
 						'inputs.valueAmount': amount,
+						pin_code:inputPincode
 					})
 				)
 				transactionsRes = await res.data.result;
@@ -540,12 +541,12 @@ class UserStore extends BaseStore {
 	};
 
 	@action
-	sideToMain = async (fromWallet: string, amount: string, toWallet: string) => {
+	sideToMain = async (fromWallet: string, amount: string, toWallet: string, inputPincode:string) => {
 		this._init('SIDE_TO_MAIN_COMPLETE');
 		try {
 			client.post(
 				'/Luniverse/sideToMainTransfer',
-				qs.stringify({ from_address: fromWallet, to_address: toWallet, amount: amount.slice(0, amount.length - 18) })
+				qs.stringify({ from_address: fromWallet, to_address: toWallet, amount: amount.slice(0, amount.length - 18), pin_code:inputPincode })
 			);
 			this._success['SIDE_TO_MAIN_COMPLETE'] = true;
 		} catch (e) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import UserStore from '../../../stores/user';
-import { aes256Decrypt } from '../../../lib/crypto';
+import { aes256Decrypt, aes256Encrypt } from '../../../lib/crypto';
 import Router from 'next/router';
 import WalletTransferComponent from '../../../components/wallet/transfer';
 
@@ -25,18 +25,18 @@ class WalletTransferContainer extends React.Component<Props> {
 		}
 	};
 
-	checkDapp = async (toWalletAddress: string, amount: string) => {
+	checkDapp = async (toWalletAddress: string, amount: string, inputPincode:string) => {
 		await this.userStore.dappCheck(toWalletAddress);
 		if (this.userStore.success['DAPP_CHECK']) {
 			if (this.userStore.dAppStatus.status === 1) {
-				await this.userStore.transactionsWallet(String(this.userStore.bridge?.data.address), toWalletAddress, amount);
+				await this.userStore.transactionsWallet(String(this.userStore.bridge?.data.address), toWalletAddress, amount, aes256Encrypt(inputPincode));
 				if (this.userStore.success['TRANSACTION_COMPLETE']) {
 					await this.initWallet();
 					alert('전송 되었습니다.');
 					setTimeout(() => Router.push('/wallet'), 1000);
 				}
 			} else if (this.userStore.dAppStatus.status === 201) {
-				await this.userStore.sideToMain(String(this.userStore.bridge?.data.address), amount, toWalletAddress);
+				await this.userStore.sideToMain(String(this.userStore.bridge?.data.address), amount, toWalletAddress, aes256Encrypt(inputPincode));
 				if (this.userStore.success['SIDE_TO_MAIN_COMPLETE']) {
 					await this.initWallet();
 					alert('전송 되었습니다.');

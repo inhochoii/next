@@ -9,7 +9,7 @@ import profile_password_setting from '../../../public/images/profile_password_se
 import danger_image from '../../../public/images/danger_image.png';
 
 interface Props {
-	checkDapp: (toWalletAddress: string, amount: string) => void;
+	checkDapp: (toWalletAddress: string, amount: string, inputPincode:string) => void;
 	pincode: string;
 	confirmSend: (amount: string) => void;
 	confirmSendAmountStatus: any;
@@ -122,7 +122,7 @@ const WalletTransferComponent: React.FC<Props> = ({
 	useEffect(() => {
 		if (inputPincode.length === 6) {
 			if (bcrypt.compareSync(inputPincode, pincode)) {
-				checkDapp(toWalletAddress, amount + '000000000000000000');
+				checkDapp(toWalletAddress, amount + '000000000000000000', inputPincode);
 			} else {
 				setInputPincode('');
 				alert('핀코드가 일치하지 않습니다.');

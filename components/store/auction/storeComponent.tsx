@@ -23,6 +23,7 @@ const StoreComponent: React.FC<Props> = ({ product, productPage, pageUpdate, que
 	const [categoryList] = useState<{ id: number; title: string; category: string }[]>([
 		{ id: 1, title: '애장품', category: '2' },
 		{ id: 2, title: '재능', category: '3' },
+		{ id: 3, title: '럭키굿즈', category: '6' },
 	]);
 	const [sortByList] = useState<{ id: number; title: string; sort: string; queryType: boolean }[]>([
 		{ id: 1, title: `전체보기`, sort: 'all', queryType: true },
@@ -157,13 +158,13 @@ const StoreComponent: React.FC<Props> = ({ product, productPage, pageUpdate, que
 														: 'auction_content_product_status'
 												}
 											>
-												<p>{item.status === '0' ? '경매예정' : item.status === '1' ? `D-${item.d_day}` : '경매종료'}</p>
+												<p>{item.category_id==='6'?"오픈예정":item.status === '0' ? '경매예정' : item.status === '1' ? `D-${item.d_day}` : '경매종료'}</p>
 											</div>
 										</div>
 										<div className="auction_content_product_info">
 											<h3>{item.donor}</h3>
 											<h4><Truncate>{item.product_nm}</Truncate></h4>
-											<h5>{`${item.price} B.POINT`}</h5>
+											<h5>{item.price} {item.category_id==='6'?"BERRY":"B.POINT"}</h5>
 										</div>
 									</a>
 								</Link>
