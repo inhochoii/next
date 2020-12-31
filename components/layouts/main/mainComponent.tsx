@@ -85,7 +85,7 @@ const MainComponent: React.FC<Props> = ({ product, newProduct, getMainProduct })
 						</p>
 						<span>|</span>
 						<p onClick={() => onClickProductCategory(6)} style={mainProductCategory === 6 ? { fontWeight: 500 } : {}}>
-							럭키굿즈
+							럭키박스
 						</p>
 					</div>
 					<div className="main_product_header_right">

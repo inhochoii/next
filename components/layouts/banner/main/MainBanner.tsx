@@ -34,29 +34,11 @@ const MainBanner: React.FC = () => {
 	return (
 		<TopBannerContainer>
 			<Slider {...settings}>
-				<div onClick={() => Router.push("/event/44")}>
-					<div style={{ backgroundImage: `url(${`./bannerImages/event_banner10.png`})`}} className="main_banner_background_image" />
+				<div>
+					<div style={{ backgroundImage: `url(${`./bannerImages/event_banner13.png`})`}} className="main_banner_background_image" />
 				</div>
-				<div onClick={() => Router.push("/event/41")}>
-					<div style={{ backgroundImage: `url(${`./bannerImages/event_banner6.png`})`}} className="main_banner_background_image" />
-				</div>
-				<div onClick={() => Router.push("/event/40")}>
-				<div style={{ backgroundImage: `url(${`./bannerImages/event_banner5.png`})`}} className="main_banner_background_image" />
-				</div>
-				<div onClick={() => Router.push("/event/37")}>
-				<div style={{ backgroundImage: `url(${`./bannerImages/event_banner7.png`})`}} className="main_banner_background_image" />
-				</div>
-				<div onClick={() => Router.push("/event/35")}>
-				<div style={{ backgroundImage: `url(${`./bannerImages/event_banner4.png`})`}} className="main_banner_background_image" />
-				</div>
-				<div onClick={() => Router.push("/event/33")}>
-				<div style={{ backgroundImage: `url(${`./bannerImages/event_banner8.png`})`}} className="main_banner_background_image" />
-				</div>
-				<div onClick={() => Router.push("/event/29")}>
-				<div style={{ backgroundImage: `url(${`./bannerImages/event_banner2.png`})`}} className="main_banner_background_image" />
-				</div>
-				<div onClick={() => Router.push("/event/27")}>
-				<div style={{ backgroundImage: `url(${`./bannerImages/event_banner1.png`})`}} className="main_banner_background_image" />
+				<div onClick={() => Router.push("/event/46")}>
+					<div style={{ backgroundImage: `url(${`./bannerImages/event_banner11.png`})`, cursor:"pointer"}} className="main_banner_background_image" />
 				</div>
 			</Slider>
 		</TopBannerContainer>
@@ -74,7 +56,6 @@ export const TopBannerContainer = styled.div`
 		margin: 0 1px;
 		background-size: 1280px 470px;
 		outline: none;
-		cursor: pointer;
 	}
 	.slick-dots {
 		bottom: 20px;

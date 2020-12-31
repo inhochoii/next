@@ -23,7 +23,7 @@ const StoreComponent: React.FC<Props> = ({ product, productPage, pageUpdate, que
 	const [categoryList] = useState<{ id: number; title: string; category: string }[]>([
 		{ id: 1, title: '애장품', category: '2' },
 		{ id: 2, title: '재능', category: '3' },
-		{ id: 3, title: '럭키굿즈', category: '6' },
+		{ id: 3, title: '럭키박스', category: '6' },
 	]);
 	const [sortByList] = useState<{ id: number; title: string; sort: string; queryType: boolean }[]>([
 		{ id: 1, title: `전체보기`, sort: 'all', queryType: true },
